@@ -88,6 +88,16 @@ widget_types = (
     ("BigLandscapeInfo", "WidgetListBigEpisodes"),
     ("Category", "WidgetListCategory"),
 )
+sort_options = (
+    ("Default", "", ""),
+    ("Last played", "lastplayed", "descending"),
+    ("Date added", "date", "descending"),
+    ("Title", "title", "ascending"),
+    ("Year", "year", "descending"),
+    ("Rating", "rating", "descending"),
+    ("Most played", "playcount", "descending"),
+    ("Last used", "lastused", "descending"),
+)
 default_path = "addons://sources/video"
 
 
@@ -107,30 +117,85 @@ class CPaths:
         self.dbcon.execute(
             "CREATE TABLE IF NOT EXISTS custom_paths (cpath_setting text unique, cpath_path text, cpath_header text, cpath_type text, cpath_label text)"
         )
+        self._migrate_sort_columns()
         self.dbcur = self.dbcon.cursor()
 
+    def _migrate_sort_columns(self):
+        cursor = self.dbcon.execute("PRAGMA table_info(custom_paths)")
+        columns = [row[1] for row in cursor.fetchall()]
+        if "cpath_sortby" not in columns:
+            self.dbcon.execute(
+                "ALTER TABLE custom_paths ADD COLUMN cpath_sortby text DEFAULT ''"
+            )
+        if "cpath_sortorder" not in columns:
+            self.dbcon.execute(
+                "ALTER TABLE custom_paths ADD COLUMN cpath_sortorder text DEFAULT ''"
+            )
+        self.dbcon.commit()
+
     def add_cpath_to_database(
-        self, cpath_setting, cpath_path, cpath_header, cpath_type, cpath_label
+        self,
+        cpath_setting,
+        cpath_path,
+        cpath_header,
+        cpath_type,
+        cpath_label,
+        cpath_sortby="",
+        cpath_sortorder="",
     ):
         self.refresh_cpaths = True
         self.dbcur.execute(
-            "INSERT OR REPLACE INTO custom_paths VALUES (?, ?, ?, ?, ?)",
-            (cpath_setting, cpath_path, cpath_header, cpath_type, cpath_label),
+            "INSERT OR REPLACE INTO custom_paths VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (
+                cpath_setting,
+                cpath_path,
+                cpath_header,
+                cpath_type,
+                cpath_label,
+                cpath_sortby,
+                cpath_sortorder,
+            ),
         )
         self.dbcon.commit()
 
     def update_cpath_in_database(
-        self, cpath_setting, cpath_path, cpath_header, cpath_type, cpath_label
+        self,
+        cpath_setting,
+        cpath_path,
+        cpath_header,
+        cpath_type,
+        cpath_label,
+        cpath_sortby=None,
+        cpath_sortorder=None,
     ):
         self.refresh_cpaths = True
-        self.dbcur.execute(
-            """
-            UPDATE custom_paths
-            SET cpath_path = ?, cpath_header = ?, cpath_type = ?, cpath_label = ?
-            WHERE cpath_setting = ?
-        """,
-            (cpath_path, cpath_header, cpath_type, cpath_label, cpath_setting),
-        )
+        if cpath_sortby is not None and cpath_sortorder is not None:
+            self.dbcur.execute(
+                """
+                UPDATE custom_paths
+                SET cpath_path = ?, cpath_header = ?, cpath_type = ?, cpath_label = ?,
+                    cpath_sortby = ?, cpath_sortorder = ?
+                WHERE cpath_setting = ?
+            """,
+                (
+                    cpath_path,
+                    cpath_header,
+                    cpath_type,
+                    cpath_label,
+                    cpath_sortby,
+                    cpath_sortorder,
+                    cpath_setting,
+                ),
+            )
+        else:
+            self.dbcur.execute(
+                """
+                UPDATE custom_paths
+                SET cpath_path = ?, cpath_header = ?, cpath_type = ?, cpath_label = ?
+                WHERE cpath_setting = ?
+            """,
+                (cpath_path, cpath_header, cpath_type, cpath_label, cpath_setting),
+            )
         self.dbcon.commit()
 
     def remove_cpath_from_database(self, cpath_setting):
@@ -160,6 +225,8 @@ class CPaths:
                 "cpath_header": item[2],
                 "cpath_type": item[3],
                 "cpath_label": item[4],
+                "cpath_sortby": item[5] if len(item) > 5 else "",
+                "cpath_sortorder": item[6] if len(item) > 6 else "",
             }
             current_dict[key] = data
         return current_dict
@@ -176,6 +243,8 @@ class CPaths:
             "cpath_header": result[2],
             "cpath_type": result[3],
             "cpath_label": result[4],
+            "cpath_sortby": result[5] if len(result) > 5 else "",
+            "cpath_sortorder": result[6] if len(result) > 6 else "",
         }
 
     def path_browser(self, label="", file=default_path, thumbnail=""):
@@ -304,6 +373,8 @@ class CPaths:
                 v["cpath_type"],
                 v["cpath_label"],
             )
+            cpath_sortby = v.get("cpath_sortby", "") or ""
+            cpath_sortorder = v.get("cpath_sortorder", "") or ""
             body = (
                 xmls.stacked_media_xml_body
                 if "Stacked" in cpath_label
@@ -314,6 +385,8 @@ class CPaths:
                 cpath_path=cpath_path,
                 cpath_header=cpath_header,
                 cpath_list_id=cpath_list_id,
+                cpath_sortby=cpath_sortby,
+                cpath_sortorder=cpath_sortorder,
             )
             if not "&amp;" in body:
                 final_format += body.replace("&", "&amp;")
@@ -366,13 +439,26 @@ class CPaths:
             return self.make_main_menu_xml(active_cpaths)
         self.make_main_menu_xml(self.fetch_current_cpaths())
 
+    def _sort_label(self, sortby):
+        for label, sb, _ in sort_options:
+            if sb == sortby:
+                return label
+        return ""
+
     def manage_widgets(self):
         active_cpaths = self.fetch_current_cpaths()
-        widget_choices = [
-            "Widget %s : %s"
-            % (count, active_cpaths.get(count, {}).get("cpath_label", ""))
-            for count in range(1, 11)
-        ]
+        show_sort = self.sort_order_enabled()
+        widget_choices = []
+        for count in range(1, 11):
+            cpath_data = active_cpaths.get(count, {})
+            label = cpath_data.get("cpath_label", "")
+            if show_sort and label:
+                sort_label = self._sort_label(
+                    cpath_data.get("cpath_sortby", "")
+                )
+                if sort_label and sort_label != "Default":
+                    label = "%s | Sort: %s" % (label, sort_label)
+            widget_choices.append("Widget %s : %s" % (count, label))
         choice = dialog.select("Choose widget", widget_choices)
         if choice == -1:
             return self.make_widget_xml(active_cpaths)
@@ -408,6 +494,21 @@ class CPaths:
         if choice == -1:
             return None
         return widget_types[choice]
+
+    def sort_order_enabled(self):
+        return xbmc.getCondVisibility("Skin.HasSetting(Enable.WidgetSortOrder)")
+
+    def sort_order_dialog(self, current_sortby=""):
+        labels = []
+        preselect = 0
+        for idx, (label, sortby, _) in enumerate(sort_options):
+            if sortby == current_sortby:
+                preselect = idx
+            labels.append(label)
+        choice = dialog.select("Choose sort order", labels, preselect=preselect)
+        if choice == -1:
+            return None, None
+        return sort_options[choice][1], sort_options[choice][2]
 
     def update_skin_strings(self):
         movie_cpath = self.fetch_one_cpath("movie.main_menu")
@@ -469,11 +570,14 @@ class CPaths:
             ("Remove", "clear_path"),
         ]
         if context == "widget":
-            choices = [
+            widget_choices = [
                 ("Move up", "move_up"),
                 ("Move down", "move_down"),
                 ("Display type", "display_type"),
-            ] + choices
+            ]
+            if self.sort_order_enabled():
+                widget_choices.append(("Sort order", "sort_order"))
+            choices = widget_choices + choices
         choice = dialog.select(
             "%s options" % self.path_type.capitalize().replace("_", " "),
             [i[0] for i in choices],
@@ -573,6 +677,19 @@ class CPaths:
             self.create_and_update_widget(
                 cpath_setting, cpath_path, cpath_header, add_to_db=False
             )
+        elif action == "sort_order":
+            result = self.fetch_one_cpath(cpath_setting)
+            if not result:
+                return None
+            current_sortby = result.get("cpath_sortby", "")
+            sortby, sortorder = self.sort_order_dialog(current_sortby)
+            if sortby is not None:
+                self.refresh_cpaths = True
+                self.dbcur.execute(
+                    "UPDATE custom_paths SET cpath_sortby = ?, cpath_sortorder = ? WHERE cpath_setting = ?",
+                    (sortby, sortorder, cpath_setting),
+                )
+                self.dbcon.commit()
         elif action == "clear_path":
             self.remove_cpath_from_database(cpath_setting)
             if context == "main_menu":
@@ -621,13 +738,30 @@ class CPaths:
                 cpath_header,
                 widget_type[0],
             )
+        cpath_sortby, cpath_sortorder = "", ""
+        if self.sort_order_enabled():
+            result = self.sort_order_dialog()
+            if result[0] is not None:
+                cpath_sortby, cpath_sortorder = result
         if add_to_db:
             self.add_cpath_to_database(
-                cpath_setting, cpath_path, cpath_header, cpath_type, cpath_label
+                cpath_setting,
+                cpath_path,
+                cpath_header,
+                cpath_type,
+                cpath_label,
+                cpath_sortby,
+                cpath_sortorder,
             )
         else:
             self.update_cpath_in_database(
-                cpath_setting, cpath_path, cpath_header, cpath_type, cpath_label
+                cpath_setting,
+                cpath_path,
+                cpath_header,
+                cpath_type,
+                cpath_label,
+                cpath_sortby,
+                cpath_sortorder,
             )
 
     def reload_skin(self):

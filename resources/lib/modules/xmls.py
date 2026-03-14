@@ -15,6 +15,8 @@ media_xml_body = '\
 \n            <param name="widget_header" value="{cpath_header}"/>\
 \n            <param name="widget_target" value="videos"/>\
 \n            <param name="list_id" value="{cpath_list_id}"/>\
+\n            <param name="sortby" value="{cpath_sortby}"/>\
+\n            <param name="sortorder" value="{cpath_sortorder}"/>\
 \n        </include>'
 
 history_xml_body = "\
@@ -30,12 +32,16 @@ stacked_media_xml_body = '\
 \n            <param name="widget_header" value="{cpath_header}"/>\
 \n            <param name="widget_target" value="videos"/>\
 \n            <param name="list_id" value="{cpath_list_id}"/>\
+\n            <param name="sortby" value="{cpath_sortby}"/>\
+\n            <param name="sortorder" value="{cpath_sortorder}"/>\
 \n        </include>\
 \n        <include content="{cpath_type}">\
 \n            <param name="content_path" value="$INFO[Window(Home).Property(fentastic.{cpath_list_id}.path)]"/>\
 \n            <param name="widget_header" value="$INFO[Window(Home).Property(fentastic.{cpath_list_id}.label)]"/>\
 \n            <param name="widget_target" value="videos"/>\
 \n            <param name="list_id" value="{cpath_list_id}1"/>\
+\n            <param name="sortby" value="{cpath_sortby}"/>\
+\n            <param name="sortorder" value="{cpath_sortorder}"/>\
 \n        </include>'
 
 main_menu_movies_xml = '\
