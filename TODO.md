@@ -6,11 +6,6 @@
       Allows arbitrary code execution if `mode` is crafted maliciously.
       Change `exec("actions.%s(params)" % mode.split(".")[1])` to `getattr(actions, mode.split(".")[1])(params)`.
 
-- [ ] **Replace deprecated `xbmc.Keyboard()` with `xbmcgui.Dialog().input()`**
-      Deprecated since Kodi 18; could be removed in a future Kodi version.
-  - `MDbList.py:200` — `set_api_key()`
-  - `search_utils.py:149` — `search_input()`
-
 - [ ] **Add timeout to `requests.get()` in MDbList.py:104**
       No timeout means the call can hang indefinitely if MDbList is down, freezing the background service thread. Add `timeout=10` or similar.
 

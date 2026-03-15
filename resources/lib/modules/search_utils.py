@@ -146,13 +146,9 @@ class SPaths:
     def search_input(self, search_term=None):
         if search_term is None or not search_term.strip():
             prompt = "Search" if xbmcgui.getCurrentWindowId() == 10000 else "New Search"
-            keyboard = xbmc.Keyboard("", prompt, False)
-            keyboard.doModal()
-            if keyboard.isConfirmed():
+            search_term = xbmcgui.Dialog().input(prompt)
+            if search_term and search_term.strip():
                 xbmc.executebuiltin("Skin.Reset(DatabaseStatus)")
-                search_term = keyboard.getText()
-                if not search_term or not search_term.strip():
-                    return
             else:
                 return
         encoded_search_term = quote(search_term)
