@@ -94,6 +94,11 @@ def routing():
 
         return category_actions(params)
 
+    if mode == "home_menu_actions":
+        from modules.actions import home_menu_actions
+
+        return home_menu_actions(params)
+
     if mode == "play_trailer":
         from modules.MDbList import play_trailer
 

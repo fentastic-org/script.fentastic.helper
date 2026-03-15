@@ -138,3 +138,72 @@ def category_actions(params):
         )
     elif action_id == "options":
         return executebuiltin("RunPlugin(%s)" % options_params)
+
+
+# Section ID -> cpath_setting prefix (widget-capable sections only)
+_WIDGET_SECTIONS = {
+    "movies": "movie",
+    "tvshows": "tvshow",
+    "custom1": "custom1",
+    "custom2": "custom2",
+    "custom3": "custom3",
+}
+
+# Section ID -> skin setting for hiding that section
+_HIDE_SETTINGS = {
+    "movies": "HomeMenuNoMoviesButton",
+    "tvshows": "HomeMenuNoTVShowsButton",
+    "custom1": "HomeMenuNoCustom1Button",
+    "custom2": "HomeMenuNoCustom2Button",
+    "custom3": "HomeMenuNoCustom3Button",
+    "music": "HomeMenuNoMusicButton",
+    "musicvideos": "HomeMenuNoMusicVideoButton",
+    "livetv": "HomeMenuNoTVButton",
+    "radio": "HomeMenuNoRadioButton",
+    "games": "HomeMenuNoGamesButton",
+    "addons": "HomeMenuNoProgramsButton",
+    "pictures": "HomeMenuNoPicturesButton",
+    "video": "HomeMenuNoVideosButton",
+    "favorites": "HomeMenuNoFavButton",
+    "weather": "HomeMenuNoWeatherButton",
+}
+
+
+def home_menu_actions(params):
+    section_id = getInfoLabel("Container(9000).ListItem.Property(id)")
+    section_label = getInfoLabel("Container(9000).ListItem.Label")
+    if not section_id:
+        return
+
+    cpath_prefix = _WIDGET_SECTIONS.get(section_id)
+    actions = []
+
+    if cpath_prefix:
+        actions.append(("Edit Widgets", "edit_widgets"))
+        actions.append(("Edit Main Menu Path", "edit_main_menu"))
+
+    hide_setting = _HIDE_SETTINGS.get(section_id)
+    if hide_setting:
+        actions.append(("Hide Section", "hide_section"))
+
+    actions.append(("Skin Settings", "skin_settings"))
+
+    labels = [a[0] for a in actions]
+    choice = xbmcgui.Dialog().select(section_label, labels)
+    if choice < 0:
+        return
+
+    action_id = actions[choice][1]
+
+    if action_id == "edit_widgets":
+        from modules.cpath_maker import CPaths
+
+        return CPaths("%s.widget" % cpath_prefix).manage_widgets()
+    elif action_id == "edit_main_menu":
+        from modules.cpath_maker import CPaths
+
+        return CPaths("%s.main_menu" % cpath_prefix).manage_main_menu_path()
+    elif action_id == "hide_section":
+        return executebuiltin("Skin.ToggleSetting(%s)" % hide_setting)
+    elif action_id == "skin_settings":
+        return executebuiltin("ActivateWindow(1112)")
