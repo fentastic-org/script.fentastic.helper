@@ -89,6 +89,11 @@ def routing():
 
         return modify_keymap()
 
+    if mode == "category_actions":
+        from modules.actions import category_actions
+
+        return category_actions(params)
+
     if mode == "play_trailer":
         from modules.MDbList import play_trailer
 
