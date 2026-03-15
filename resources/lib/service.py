@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import xbmc, xbmcgui
 from threading import Thread
 from modules.MDbList import MDbListAPI

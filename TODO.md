@@ -43,7 +43,7 @@
 - [ ] **Remove dead code: `MDbListAPI.last_checked_imdb_id` class variable (MDbList.py:31)**
   Never read or written anywhere.
 
-- [ ] **Add missing `# -*- coding: utf-8 -*-` headers for consistency**
+- [x] **Add missing `# -*- coding: utf-8 -*-` headers for consistency**
   `MDbList.py` and `service.py` are missing the header that other files have. Not required in Python 3, but inconsistent with the rest of the codebase.
 
 - [ ] **Standardize string formatting**

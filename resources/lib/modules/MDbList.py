@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcvfs
 import datetime as dt
 import sqlite3 as database
