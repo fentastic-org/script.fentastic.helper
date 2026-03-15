@@ -29,8 +29,6 @@ session = make_session("https://www.mdblist.com/")
 
 
 class MDbListAPI:
-    last_checked_imdb_id = None
-
     def __init__(self):
         self.connect_database()
 

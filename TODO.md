@@ -40,8 +40,5 @@
 
 ## Low Priority
 
-- [ ] **Remove dead code: `MDbListAPI.last_checked_imdb_id` class variable (MDbList.py:31)**
-      Never read or written anywhere.
-
 - [ ] **Standardize string formatting**
       The codebase mixes `%` formatting, `.format()`, and f-strings. Not a bug, but inconsistent.
