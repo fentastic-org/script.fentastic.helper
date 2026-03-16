@@ -2,6 +2,7 @@
 import xbmc, xbmcgui
 from threading import Thread
 from modules.MDbList import MDbListAPI
+from modules.view_persistence import ViewPersistenceMonitor
 import json
 
 logger = xbmc.log
@@ -98,6 +99,13 @@ class RatingsService(xbmc.Monitor):
                 set_property("fentastic.%s" % k, v)
 
 
+service = RatingsService()
+
+view_thread = Thread(
+    target=ViewPersistenceMonitor(service).run, daemon=True
+)
+view_thread.start()
+
 logger("###FENtastic: Ratings Service Started", 1)
-RatingsService().listitem_monitor()
+service.listitem_monitor()
 logger("###FENtastic: RatingsService Finished", 1)
