@@ -31,7 +31,6 @@ def load_changelog():
     except Exception:
         content = 'Changelog not available.'
     xbmcgui.Window(10000).setProperty('ChangelogContent', content)
-    xbmc.executebuiltin('ActivateWindow(1119)')
 
 
 # def get_current_keymap_path():
