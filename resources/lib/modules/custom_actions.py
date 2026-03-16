@@ -19,6 +19,21 @@ def fix_black_screen():
         xbmc.executebuiltin("Skin.ToggleSetting(TrailerPlaying)")
 
 
+def load_changelog():
+    import xbmcaddon
+    import os
+    addon = xbmcaddon.Addon('skin.fentastic')
+    skin_path = xbmcvfs.translatePath(addon.getAddonInfo('path'))
+    changelog_path = os.path.join(skin_path, 'changelog.txt')
+    try:
+        with open(changelog_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except Exception:
+        content = 'Changelog not available.'
+    xbmcgui.Window(10000).setProperty('ChangelogContent', content)
+    xbmc.executebuiltin('ActivateWindow(1119)')
+
+
 # def get_current_keymap_path():
 #     for keymap_name in POSSIBLE_KEYMAP_NAMES:
 #         keymap_path = xbmcvfs.translatePath(KEYMAP_LOCATION + keymap_name)

@@ -108,3 +108,8 @@ def routing():
         from modules.custom_actions import fix_black_screen
 
         return fix_black_screen()
+
+    if mode == "load_changelog":
+        from modules.custom_actions import load_changelog
+
+        return load_changelog()

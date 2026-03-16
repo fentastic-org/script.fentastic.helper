@@ -26,6 +26,7 @@ _PROVIDER_PLUGINS = {
     "2": "plugin.video.umbrella",
     "3": "plugin.video.pov",
     "4": "plugin.video.seren",
+    "5": "plugin.video.dradis",
 }
 
 
@@ -81,6 +82,11 @@ def category_actions(params):
             trakt_params = (
                 "plugin://plugin.video.umbrella/"
                 "?action=traktManager&imdb=%s&media_type=%s" % (imdb_id, media_type)
+            )
+        elif plugin_id == "plugin.video.dradis":
+            trakt_params = (
+                "plugin://plugin.video.dradis/"
+                "?action=tools_traktManager&imdb=%s&media_type=%s" % (imdb_id, media_type)
             )
         elif plugin_id in (
             "plugin.video.fen",
