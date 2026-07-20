@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcvfs
 import datetime as dt
 import sqlite3 as database
@@ -29,6 +28,8 @@ session = make_session("https://www.mdblist.com/")
 
 
 class MDbListAPI:
+    last_checked_imdb_id = None
+
     def __init__(self):
         self.connect_database()
 
@@ -196,6 +197,7 @@ def play_trailer():
 
 
 def set_api_key():
-    api_key = xbmcgui.Dialog().input("Enter MDbList API Key")
-    if api_key:
-        xbmc.executebuiltin(f"Skin.SetString(mdblist_api_key,{api_key})")
+    keyboard = xbmc.Keyboard("", "Enter MDbList API Key")
+    keyboard.doModal()
+    if keyboard.isConfirmed() and keyboard.getText():
+        xbmc.executebuiltin(f"Skin.SetString(mdblist_api_key,{keyboard.getText()})")
