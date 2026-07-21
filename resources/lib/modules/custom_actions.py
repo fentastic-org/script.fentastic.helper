@@ -123,3 +123,18 @@ def modify_keymap():
         with xbmcvfs.File(keymap_path, "w") as xml_file:
             xml_file.write(pretty_xml)
     xbmc.executebuiltin("Action(reloadkeymaps)")
+
+
+def load_changelog():
+    import os
+    import xbmcaddon
+
+    try:
+        addon = xbmcaddon.Addon("skin.fentastic")
+        skin_path = xbmcvfs.translatePath(addon.getAddonInfo("path"))
+        changelog_path = os.path.join(skin_path, "changelog.txt")
+        with open(changelog_path, "r", encoding="utf-8") as changelog_file:
+            content = changelog_file.read()
+    except Exception:
+        content = "Changelog not available."
+    xbmcgui.Window(10000).setProperty("ChangelogContent", content)
