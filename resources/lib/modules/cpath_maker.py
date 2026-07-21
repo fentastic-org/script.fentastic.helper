@@ -613,13 +613,18 @@ class CPaths:
             % cpath_header,
         ):
             widget_type = self.widget_type(label="Choose stacked widget display type")
-            cpath_type, cpath_label = "%sStacked" % widget_type[
-                1
-            ], "%s | Stacked (%s) | Category" % (cpath_header, widget_type[0])
+            cpath_type, cpath_label = (
+                "%sStacked" % widget_type[1],
+                "%s | Stacked (%s) | Category" % (cpath_header, widget_type[0]),
+            )
         else:
-            cpath_type, cpath_label = widget_type[1], "%s | %s" % (
-                cpath_header,
-                widget_type[0],
+            cpath_type, cpath_label = (
+                widget_type[1],
+                "%s | %s"
+                % (
+                    cpath_header,
+                    widget_type[0],
+                ),
             )
         if add_to_db:
             self.add_cpath_to_database(
