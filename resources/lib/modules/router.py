@@ -15,7 +15,8 @@ def routing():
         return widget_monitor(params.get("list_id"))
 
     if "actions" in mode:
-        from modules import actions
+        # referenced by the exec() below, which ruff cannot see through
+        from modules import actions  # noqa: F401
 
         return exec("actions.%s(params)" % mode.split(".")[1])
 

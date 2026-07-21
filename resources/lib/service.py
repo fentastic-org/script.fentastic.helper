@@ -1,4 +1,5 @@
-import xbmc, xbmcgui
+import xbmc
+import xbmcgui
 from threading import Thread
 from modules.MDbList import MDbListAPI
 import json

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import xbmc, xbmcgui
+import xbmc
+import xbmcgui
 
 # from modules.logger import logger
 
@@ -11,13 +12,12 @@ def widget_monitor(list_id):
     window = None
     try:
         delay = float(xbmc.getInfoLabel("Skin.String(category_widget_delay)")) / 1000
-    except:
+    except Exception:
         delay = 0.75
     display_delay = (
         xbmc.getInfoLabel("Skin.HasSetting(category_widget_display_delay)") == "True"
     )
     stack_id = list_id + "1"
-    poster_toggle, landscape_toggle = True, False
     while not monitor.abortRequested():
         window_id = xbmcgui.getCurrentWindowId()
         if window_id not in [10000, 11121]:
@@ -67,7 +67,6 @@ def widget_monitor(list_id):
                     % (countdown)
                 )
         if switch_widget:
-            position = int(xbmc.getInfoLabel("Container(%s).Position" % list_id))
             cpath_label = xbmc.getInfoLabel("ListItem.Label")
             stack_label_control.setLabel(cpath_label)
             window.setProperty("fentastic.%s.label" % list_id, cpath_label)
@@ -83,7 +82,7 @@ def widget_monitor(list_id):
             monitor.waitForAbort(0.50)
             try:
                 stack_control.selectItem(0)
-            except:
+            except Exception:
                 pass
         else:
             stack_label_control.setLabel(
@@ -92,9 +91,9 @@ def widget_monitor(list_id):
             monitor.waitForAbort(0.25)
     try:
         del monitor
-    except:
+    except Exception:
         pass
     try:
         del window
-    except:
+    except Exception:
         pass

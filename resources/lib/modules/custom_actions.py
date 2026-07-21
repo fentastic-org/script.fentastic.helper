@@ -1,4 +1,6 @@
-import xbmc, xbmcgui, xbmcvfs
+import xbmc
+import xbmcgui
+import xbmcvfs
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 

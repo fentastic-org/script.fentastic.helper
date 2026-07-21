@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import xbmc, xbmcgui, xbmcvfs
+import xbmc
+import xbmcgui
+import xbmcvfs
 import sqlite3 as database
 from modules import xmls
 from urllib.parse import quote

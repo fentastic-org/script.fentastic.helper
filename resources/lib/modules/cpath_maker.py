@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-import xbmc, xbmcgui, xbmcvfs
+import xbmc
+import xbmcgui
+import xbmcvfs
 import json
 import sqlite3 as database
 from threading import Thread
@@ -146,13 +148,13 @@ class CPaths:
         ).fetchall()
         try:
             results.sort(key=lambda k: int(k[0].split(".")[-1]))
-        except:
+        except Exception:
             pass
         current_dict = {}
         for item in results:
             try:
                 key = int(item[0].split(".")[-1])
-            except:
+            except Exception:
                 key = item[0]
             data = {
                 "cpath_setting": item[0],
@@ -268,7 +270,7 @@ class CPaths:
             main_menu_path=active_cpaths[key]["cpath_path"],
             cpath_header=active_cpaths[key].get("cpath_header", ""),
         )
-        if not "&amp;" in final_format:
+        if "&amp;" not in final_format:
             final_format = final_format.replace("&", "&amp;")
         self.write_xml(xml_file, final_format)
         self.update_skin_strings()
@@ -315,7 +317,7 @@ class CPaths:
                 cpath_header=cpath_header,
                 cpath_list_id=cpath_list_id,
             )
-            if not "&amp;" in body:
+            if "&amp;" not in body:
                 final_format += body.replace("&", "&amp;")
         final_format += xmls.media_xml_end
         self.write_xml(xml_file, final_format)
@@ -688,7 +690,7 @@ def files_get_directory(directory, properties=["title", "file", "thumbnail"]):
             for i in get_jsonrpc(command).get("files")
             if i["file"].startswith("plugin://") and i["filetype"] == "directory"
         ]
-    except:
+    except Exception:
         results = None
     return results
 
@@ -747,29 +749,29 @@ def starting_widgets():
                 active_widget = active_cpaths.get(count, {})
                 if not active_widget:
                     continue
-                if not "Stacked" in active_widget["cpath_label"]:
+                if "Stacked" not in active_widget["cpath_label"]:
                     continue
                 cpath_setting = active_widget["cpath_setting"]
                 if not cpath_setting:
                     continue
                 try:
                     list_id = base_list_id + int(cpath_setting.split(".")[2])
-                except:
+                except Exception:
                     continue
                 try:
                     first_item = files_get_directory(active_widget["cpath_path"])[0]
-                except:
+                except Exception:
                     continue
                 if not first_item:
                     continue
                 cpath_label, cpath_path = first_item["label"], first_item["file"]
                 window.setProperty("fentastic.%s.label" % list_id, cpath_label)
                 window.setProperty("fentastic.%s.path" % list_id, cpath_path)
-        except:
+        except Exception:
             pass
     try:
         del window
-    except:
+    except Exception:
         pass
 
 

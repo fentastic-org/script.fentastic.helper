@@ -1,4 +1,6 @@
-import xbmc, xbmcgui, xbmcvfs
+import xbmc
+import xbmcgui
+import xbmcvfs
 import datetime as dt
 import sqlite3 as database
 import time
@@ -51,7 +53,7 @@ class MDbListAPI:
     def datetime_workaround(self, data, str_format):
         try:
             datetime_object = dt.datetime.strptime(data, str_format)
-        except:
+        except Exception:
             datetime_object = dt.datetime(*(time.strptime(data, str_format)[0:6]))
         return datetime_object
 
